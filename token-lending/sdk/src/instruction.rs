@@ -543,9 +543,9 @@ impl LendingInstruction {
                 let (liquidity_amount, rest) = Self::unpack_u64(rest)?;
                 let (optimal_utilization_rate, rest) = Self::unpack_u8(rest)?;
                 let (max_utilization_rate, rest) = Self::unpack_u8(rest)?;
-                let (loan_to_value_ratio, rest) = Self::unpack_u8(rest)?;
+                let (loan_to_value_ratio, rest) = Self::unpack_u16(rest)?;
                 let (liquidation_bonus, rest) = Self::unpack_u8(rest)?;
-                let (liquidation_threshold, rest) = Self::unpack_u8(rest)?;
+                let (liquidation_threshold, rest) = Self::unpack_u16(rest)?;
                 let (min_borrow_rate, rest) = Self::unpack_u8(rest)?;
                 let (optimal_borrow_rate, rest) = Self::unpack_u8(rest)?;
                 let (max_borrow_rate, rest) = Self::unpack_u8(rest)?;
@@ -561,7 +561,7 @@ impl LendingInstruction {
                 let (added_borrow_weight_bps, rest) = Self::unpack_u64(rest)?;
                 let (asset_type, rest) = Self::unpack_u8(rest)?;
                 let (max_liquidation_bonus, rest) = Self::unpack_u8(rest)?;
-                let (max_liquidation_threshold, _rest) = Self::unpack_u8(rest)?;
+                let (max_liquidation_threshold, _rest) = Self::unpack_u16(rest)?;
                 Self::InitReserve {
                     liquidity_amount,
                     config: ReserveConfig {
@@ -637,9 +637,9 @@ impl LendingInstruction {
             16 => {
                 let (optimal_utilization_rate, rest) = Self::unpack_u8(rest)?;
                 let (max_utilization_rate, rest) = Self::unpack_u8(rest)?;
-                let (loan_to_value_ratio, rest) = Self::unpack_u8(rest)?;
+                let (loan_to_value_ratio, rest) = Self::unpack_u16(rest)?;
                 let (liquidation_bonus, rest) = Self::unpack_u8(rest)?;
-                let (liquidation_threshold, rest) = Self::unpack_u8(rest)?;
+                let (liquidation_threshold, rest) = Self::unpack_u16(rest)?;
                 let (min_borrow_rate, rest) = Self::unpack_u8(rest)?;
                 let (optimal_borrow_rate, rest) = Self::unpack_u8(rest)?;
                 let (max_borrow_rate, rest) = Self::unpack_u8(rest)?;
@@ -655,7 +655,7 @@ impl LendingInstruction {
                 let (added_borrow_weight_bps, rest) = Self::unpack_u64(rest)?;
                 let (asset_type, rest) = Self::unpack_u8(rest)?;
                 let (max_liquidation_bonus, rest) = Self::unpack_u8(rest)?;
-                let (max_liquidation_threshold, rest) = Self::unpack_u8(rest)?;
+                let (max_liquidation_threshold, rest) = Self::unpack_u16(rest)?;
                 let (window_duration, rest) = Self::unpack_u64(rest)?;
                 let (max_outflow, _rest) = Self::unpack_u64(rest)?;
 
@@ -733,7 +733,19 @@ impl LendingInstruction {
             .ok_or(LendingError::InstructionUnpackError)?;
         Ok((value, rest))
     }
-
+    fn unpack_u16(input: &[u8]) -> Result<(u16, &[u8]), ProgramError> {
+        if input.len() < 2 {
+            msg!("u16 cannot be unpacked");
+            return Err(LendingError::InstructionUnpackError.into());
+        }
+        let (bytes, rest) = input.split_at(2);
+        let value = bytes
+            .get(..2)
+            .and_then(|slice| slice.try_into().ok())
+            .map(u16::from_le_bytes)
+            .ok_or(LendingError::InstructionUnpackError)?;
+        Ok((value, rest))
+    }
     fn unpack_u8(input: &[u8]) -> Result<(u8, &[u8]), ProgramError> {
         if input.is_empty() {
             msg!("u8 cannot be unpacked");
@@ -1736,11 +1748,11 @@ mod test {
                     config: ReserveConfig {
                         optimal_utilization_rate: rng.gen::<u8>(),
                         max_utilization_rate: rng.gen::<u8>(),
-                        loan_to_value_ratio: rng.gen::<u8>(),
+                        loan_to_value_ratio: rng.gen::<u16>(),
                         liquidation_bonus: rng.gen::<u8>(),
                         max_liquidation_bonus: rng.gen::<u8>(),
-                        liquidation_threshold: rng.gen::<u8>(),
-                        max_liquidation_threshold: rng.gen::<u8>(),
+                        liquidation_threshold: rng.gen::<u16>(),
+                        max_liquidation_threshold: rng.gen::<u16>(),
                         min_borrow_rate: rng.gen::<u8>(),
                         optimal_borrow_rate: rng.gen::<u8>(),
                         max_borrow_rate: rng.gen::<u8>(),
@@ -1896,11 +1908,11 @@ mod test {
                     config: ReserveConfig {
                         optimal_utilization_rate: rng.gen::<u8>(),
                         max_utilization_rate: rng.gen::<u8>(),
-                        loan_to_value_ratio: rng.gen::<u8>(),
+                        loan_to_value_ratio: rng.gen::<u16>(),
                         liquidation_bonus: rng.gen::<u8>(),
                         max_liquidation_bonus: rng.gen::<u8>(),
-                        liquidation_threshold: rng.gen::<u8>(),
-                        max_liquidation_threshold: rng.gen::<u8>(),
+                        liquidation_threshold: rng.gen::<u16>(),
+                        max_liquidation_threshold: rng.gen::<u16>(),
                         min_borrow_rate: rng.gen::<u8>(),
                         optimal_borrow_rate: rng.gen::<u8>(),
                         max_borrow_rate: rng.gen::<u8>(),

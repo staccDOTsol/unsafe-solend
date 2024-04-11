@@ -960,11 +960,11 @@ fn process_refresh_obligation(program_id: &Pubkey, accounts: &[AccountInfo]) -> 
         let market_value_lower_bound =
             deposit_reserve.market_value_lower_bound(liquidity_amount)?;
 
-        let loan_to_value_rate = Rate::from_percent(deposit_reserve.config.loan_to_value_ratio);
+        let loan_to_value_rate = Rate::from_percent_u64(deposit_reserve.config.loan_to_value_ratio.into());
         let liquidation_threshold_rate =
-            Rate::from_percent(deposit_reserve.config.liquidation_threshold);
+            Rate::from_percent_u64(deposit_reserve.config.liquidation_threshold.into());
         let max_liquidation_threshold_rate =
-            Rate::from_percent(deposit_reserve.config.max_liquidation_threshold);
+            Rate::from_percent_u64(deposit_reserve.config.max_liquidation_threshold.into());
 
         collateral.market_value = market_value;
         deposited_value = deposited_value.try_add(market_value)?;

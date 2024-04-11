@@ -74,15 +74,15 @@ struct PartialReserveConfig {
     pub max_utilization_rate: Option<u8>,
     /// Target ratio of the value of borrows to deposits, as a percentage
     /// 0 if use as collateral is disabled
-    pub loan_to_value_ratio: Option<u8>,
+    pub loan_to_value_ratio: Option<u16>,
     /// Bonus a liquidator gets when repaying part of an unhealthy obligation, as a percentage
     pub liquidation_bonus: Option<u8>,
     /// Maximum bonus a liquidator gets when repaying part of an unhealthy obligation, as a percentage
     pub max_liquidation_bonus: Option<u8>,
     /// Loan to value ratio at which an obligation can be liquidated, as a percentage
-    pub liquidation_threshold: Option<u8>,
+    pub liquidation_threshold: Option<u16>,
     /// Loan to value ratio at which an obligation can be liquidated for the maximum bonus, as a percentage
-    pub max_liquidation_threshold: Option<u8>,
+    pub max_liquidation_threshold: Option<u16>,
     /// Min borrow APY
     pub min_borrow_rate: Option<u8>,
     /// Optimal (utilization) borrow APY

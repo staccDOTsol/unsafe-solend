@@ -82,7 +82,7 @@ impl Reserve {
 
     /// get loan to value ratio as a Rate
     pub fn loan_to_value_ratio(&self) -> Rate {
-        Rate::from_percent(self.config.loan_to_value_ratio)
+        Rate::from_percent_u64(self.config.loan_to_value_ratio.into())
     }
 
     /// Convert USD to liquidity tokens.
@@ -866,15 +866,15 @@ pub struct ReserveConfig {
     pub max_utilization_rate: u8,
     /// Target ratio of the value of borrows to deposits, as a percentage
     /// 0 if use as collateral is disabled
-    pub loan_to_value_ratio: u8,
+    pub loan_to_value_ratio: u16,
     /// The minimum bonus a liquidator gets when repaying part of an unhealthy obligation, as a percentage
     pub liquidation_bonus: u8,
     /// The maximum bonus a liquidator gets when repaying part of an unhealthy obligation, as a percentage
     pub max_liquidation_bonus: u8,
     /// Loan to value ratio at which an obligation can be liquidated, as a percentage
-    pub liquidation_threshold: u8,
+    pub liquidation_threshold: u16,
     /// Loan to value ratio at which the obligation can be liquidated for the maximum bonus
-    pub max_liquidation_threshold: u8,
+    pub max_liquidation_threshold: u16,
     /// Min borrow APY
     pub min_borrow_rate: u8,
     /// Optimal (utilization) borrow APY
@@ -929,13 +929,13 @@ pub fn validate_reserve_config(config: ReserveConfig) -> ProgramResult {
         return Err(LendingError::InvalidConfig.into());
     }
     if config.liquidation_threshold < config.loan_to_value_ratio
-        || config.liquidation_threshold > 100
+        || config.liquidation_threshold >= u16::MAX
     {
         msg!("Liquidation threshold must be in range [LTV, 100]");
         return Err(LendingError::InvalidConfig.into());
     }
     if config.max_liquidation_threshold < config.liquidation_threshold
-        || config.max_liquidation_threshold > 100
+        || config.max_liquidation_threshold >  u16::MAX
     {
         msg!("Max liquidation threshold must be in range [liquidation threshold, 100]");
         return Err(LendingError::InvalidConfig.into());
@@ -1193,9 +1193,9 @@ impl Pack for Reserve {
             8,
             PUBKEY_BYTES,
             1,
+            2,
             1,
-            1,
-            1,
+            2,
             1,
             1,
             1,
@@ -1215,8 +1215,8 @@ impl Pack for Reserve {
             1,
             8,
             1,
-            1,
-            138
+            2,
+            135
         ];
 
         // reserve
@@ -1348,9 +1348,9 @@ impl Pack for Reserve {
             8,
             PUBKEY_BYTES,
             1,
+            2,
             1,
-            1,
-            1,
+            2,
             1,
             1,
             1,
@@ -1370,8 +1370,8 @@ impl Pack for Reserve {
             1,
             8,
             1,
-            1,
-            138
+            2,
+            135
         ];
 
         let version = u8::from_le_bytes(*version);
@@ -1389,10 +1389,10 @@ impl Pack for Reserve {
             liquidation_bonus,
             u8::from_le_bytes(*config_max_liquidation_bonus),
         );
-        let liquidation_threshold = u8::from_le_bytes(*config_liquidation_threshold);
+        let liquidation_threshold = u16::from_le_bytes(*config_liquidation_threshold);
         let max_liquidation_threshold = max(
             liquidation_threshold,
-            u8::from_le_bytes(*config_max_liquidation_threshold),
+            u16::from_le_bytes(*config_max_liquidation_threshold),
         );
 
         Ok(Self {
@@ -1430,7 +1430,7 @@ impl Pack for Reserve {
                     optimal_utilization_rate,
                     u8::from_le_bytes(*config_max_utilization_rate),
                 ),
-                loan_to_value_ratio: u8::from_le_bytes(*config_loan_to_value_ratio),
+                loan_to_value_ratio: u16::from_le_bytes(*config_loan_to_value_ratio),
                 liquidation_bonus,
                 max_liquidation_bonus,
                 liquidation_threshold,
@@ -1488,7 +1488,7 @@ mod test {
         for _ in 0..100 {
             let optimal_utilization_rate = rng.gen();
             let liquidation_bonus: u8 = rng.gen();
-            let liquidation_threshold: u8 = rng.gen();
+            let liquidation_threshold: u16 = rng.gen();
 
             let reserve = Reserve {
                 version: PROGRAM_VERSION,

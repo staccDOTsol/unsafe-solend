@@ -6,7 +6,7 @@ PROGRAM_ID=$2;
 OWNER=`grep 'keypair_path:' $SOLANA_CONFIG | awk '{print $2}'`;
 MARKET_OWNER=`solana --config $SOLANA_CONFIG address`;
 
-target/debug/spl-token --config $SOLANA_CONFIG unwrap;
+spl-token --config $SOLANA_CONFIG unwrap;
 
 set -e;
 echo "Using Solana config filepath: $SOLANA_CONFIG";
@@ -14,17 +14,16 @@ echo "Program ID: $PROGRAM_ID";
 echo "Owner: $OWNER";
 echo "Market Owner $MARKET_OWNER";
 
-solana config set --url https://api.devnet.solana.com;
+solana config set --url https://jarrett-devnet-8fa6.devnet.rpcpool.com/283aba57-34a4-4500-ba4d-1832ff9ca64a;
 
-solana airdrop 10 $MARKET_OWNER;
-SOURCE=`target/debug/spl-token --config $SOLANA_CONFIG wrap 10 2>&1 | head -n1 | awk '{print $NF}'`;
+SOURCE=`spl-token --config $SOLANA_CONFIG wrap 10 2>&1 | head -n1 | awk '{print $NF}'`;
 
 solana program --config $SOLANA_CONFIG deploy \
   --program-id $PROGRAM_ID \
-  target/deploy/solend_program.so;
+  target/sbf-solana-solana/release/solend_program.so;
 
 echo "Creating Lending Market";
-CREATE_MARKET_OUTPUT=`target/debug/solend-program create-market \
+CREATE_MARKET_OUTPUT=`target/debug/solend-cli create-market \
   --fee-payer    $OWNER \
   --market-owner $MARKET_OWNER \
   --verbose`;
@@ -34,7 +33,7 @@ MARKET_ADDR=`echo $CREATE_MARKET_OUTPUT | head -n1 | awk '{print $4}'`;
 AUTHORITY_ADDR=`echo $CREATE_MARKET_OUTPUT | grep "Authority Address" | awk '{print $NF}'`;
 
 echo "Creating SOL reserve";
-SOL_RESERVE_OUTPUT=`target/debug/solend-program add-reserve \
+SOL_RESERVE_OUTPUT=`target/debug/solend-cli add-reserve \
   --fee-payer         $OWNER \
   --market-owner      $OWNER \
   --source-owner      $OWNER \
@@ -58,12 +57,12 @@ echo "$SOL_RESERVE_OUTPUT";
 
 # USDC Reserve
 echo "Creating USDC Reserve";
-USDC_TOKEN_MINT=`target/debug/spl-token --config $SOLANA_CONFIG create-token --decimals 6 |  awk '{print $3}'`;
+USDC_TOKEN_MINT=`spl-token --config $SOLANA_CONFIG create-token --decimals 6 |  awk '{print $3}'`;
 echo "USDC MINT: $USDC_TOKEN_MINT"
-USDC_TOKEN_ACCOUNT=`target/debug/spl-token --config $SOLANA_CONFIG create-account $USDC_TOKEN_MINT | awk '{print $3}'`;
-target/debug/spl-token --config $SOLANA_CONFIG mint $USDC_TOKEN_MINT 30000000;
+USDC_TOKEN_ACCOUNT=`spl-token --config $SOLANA_CONFIG create-account $USDC_TOKEN_MINT | awk '{print $3}'`;
+spl-token --config $SOLANA_CONFIG mint $USDC_TOKEN_MINT 30000000;
 
-USDC_RESERVE_OUTPUT=`target/debug/solend-program add-reserve \
+USDC_RESERVE_OUTPUT=`target/debug/solend-cli add-reserve \
   --fee-payer         $OWNER \
   --market-owner      $OWNER \
   --source-owner      $OWNER \
@@ -87,12 +86,12 @@ echo "$USDC_RESERVE_OUTPUT";
 
 # ETH Reserve
 echo "Creating ETH Reserve"
-ETH_TOKEN_MINT=`target/debug/spl-token --config $SOLANA_CONFIG create-token --decimals 6 |  awk '{print $3}'`;
+ETH_TOKEN_MINT=`spl-token --config $SOLANA_CONFIG create-token --decimals 6 |  awk '{print $3}'`;
 echo "ETH MINT: $ETH_TOKEN_MINT"
-ETH_TOKEN_ACCOUNT=`target/debug/spl-token --config $SOLANA_CONFIG create-account $ETH_TOKEN_MINT | awk '{print $3}'`;
-target/debug/spl-token --config $SOLANA_CONFIG mint $ETH_TOKEN_MINT 8000000;
+ETH_TOKEN_ACCOUNT=`spl-token --config $SOLANA_CONFIG create-account $ETH_TOKEN_MINT | awk '{print $3}'`;
+spl-token --config $SOLANA_CONFIG mint $ETH_TOKEN_MINT 8000000;
 
-ETH_RESERVE_OUTPUT=`target/debug/solend-program add-reserve \
+ETH_RESERVE_OUTPUT=`target/debug/solend-cli add-reserve \
   --fee-payer         $OWNER \
   --market-owner      $OWNER \
   --source-owner      $OWNER \
@@ -116,12 +115,12 @@ echo "$ETH_RESERVE_OUTPUT";
 
 
 echo "Creating BTC Reserve"
-BTC_TOKEN_MINT=`target/debug/spl-token --config $SOLANA_CONFIG create-token --decimals 6 |  awk '{print $3}'`;
+BTC_TOKEN_MINT=`spl-token --config $SOLANA_CONFIG create-token --decimals 6 |  awk '{print $3}'`;
 echo "BTC MINT: $BTC_TOKEN_MINT"
-BTC_TOKEN_ACCOUNT=`target/debug/spl-token --config $SOLANA_CONFIG create-account $BTC_TOKEN_MINT | awk '{print $3}'`;
-target/debug/spl-token --config $SOLANA_CONFIG mint $BTC_TOKEN_MINT 8000000;
+BTC_TOKEN_ACCOUNT=`spl-token --config $SOLANA_CONFIG create-account $BTC_TOKEN_MINT | awk '{print $3}'`;
+spl-token --config $SOLANA_CONFIG mint $BTC_TOKEN_MINT 8000000;
 
-BTC_RESERVE_OUTPUT=`target/debug/solend-program add-reserve \
+BTC_RESERVE_OUTPUT=`target/debug/solend-cli add-reserve \
   --fee-payer         $OWNER \
   --market-owner      $OWNER \
   --source-owner      $OWNER \
@@ -143,7 +142,7 @@ BTC_RESERVE_OUTPUT=`target/debug/solend-program add-reserve \
   --verbose`;
 echo "$BTC_RESERVE_OUTPUT";
 
-target/debug/spl-token --config $SOLANA_CONFIG unwrap;
+spl-token --config $SOLANA_CONFIG unwrap;
 
 # Export variables for new config.ts file
 CONFIG_TEMPLATE_FILE="https://raw.githubusercontent.com/solendprotocol/common/master/src/devnet_template.json"
