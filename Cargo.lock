@@ -4491,16 +4491,15 @@ dependencies = [
 
 [[package]]
 name = "switchboard-v2"
-version = "0.1.22"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8abae8f9cce6c361940bf09fdff5772f32c9d24f3144c0767a10b1109bea7f26"
+checksum = "29d867b698f9fe760c6dc6aa8df6edabcb03227ef7cec4cc0b101f2cc37cce85"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
  "bytemuck",
  "rust_decimal",
  "solana-program",
- "spl-token",
  "superslice",
 ]
 
