@@ -12,7 +12,7 @@ no-entrypoint = []
 test-bpf = []
 
 [dependencies]
-pyth-sdk-solana = "0.7.0"
+pyth-sdk-solana = "0.10.1"
 solana-program = "=1.14.10"
 spl-token = { version = "3.3.0", features=["no-entrypoint"] }
 solend-sdk = { path = "../sdk" }
